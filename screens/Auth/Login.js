@@ -4,80 +4,50 @@ import { Feather } from '@expo/vector-icons';
 import API from '../../components/Api';
 import {Button, Input, InputCode, Spinner} from '../../components/AppComponents';
 import {setStorage} from '../../components/Functions';
+import AuthContext from "../../contexts/AuthContext"
 
 import Colors from '../../constants/Colors';
 
+export default function Login(props) {
 
-export default class Login extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      codeKeyboardActive:true,
-      isRefresh:false,
-      isLogin:[],
-      isAuth:false,
-      code:'',
-      db_host:'',
-      db_name:'',
-      msg:'',
-      email:'',
-      password:''
-    }
-  }
+  const [username, setUsername] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [isRefresh, setIsRefresh] = React.useState(false);
 
+  const [LOGGED_IN, setLOGGED_IN] = React.useState(false);
+  const { isLogin } = React.useContext(AuthContext);
+  isLogin({LOGGED_IN});
 
-async componentDidMount() {
+Init = async () => {
   var Login = await AsyncStorage.getItem('Login');
-  var userType = await AsyncStorage.getItem('userType');
-  var UID = await AsyncStorage.getItem('UID');
-
-
-
-}
-pressCode = async (key) => {
-  if(this.state.code.length > 7){
-    this.Auth();
-  }else{
-    this.setState({code:this.state.code + key});
-  }
 }
 
 
 Login = async () => {
-  this.setState({ isRefresh: true});
-
-  if(this.state.email && this.state.password){
-    API.Login(this.state.email, this.state.password).then((res) => {
-
+  setIsRefresh(true);
+  if(username && password){
+    API.Login(username, password).then((res) => {
         if(res.isLogin === 'true'){
-
           setStorage('isLogin', toString(true));
           setStorage('UID', res.user_id );    
-
-
+          setLOGGED_IN(true);
         }else{
           setStorage('isLogin','');
-          setStorage('userType', '');     
-          setStorage('UID', '');     
-          this.setState({ isRefresh: false});
-          this.setState({ msg: res.msg});
+          setStorage('UID', '');    
+          setIsRefresh(false);
+          setLOGGED_IN(false);
           alert(res.msg);
         }
-       
-      }).catch((error)=>{ 
-      this.setState({ isRefresh: false});
-      alert(error)
+    }).catch((error)=>{ 
+        setIsRefresh(false);
+        alert(error)
     }); 
   }else{
     alert('Complete los datos requeridos')
-
   }
-
 }
-render() {
 
-
-
+Init();
 
 return (
 
@@ -85,7 +55,7 @@ return (
   <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
   <SafeAreaView style={styles.container}>
   <View style={{ flex : .1}} />
-  <Spinner isLoading={this.state.isRefresh}/>
+  <Spinner isLoading={isRefresh}/>
 
 
   <View style={{ flex : 1}} >
@@ -94,19 +64,20 @@ return (
     </View>
   <View style={styles.forms}>
           <Input label="Usuario" round
-            onChangeText={(text) => { this.setState({email: text}) }}
-            value={this.state.email}
+            onChangeText={setUsername}
+            value={username}
             placeholderTextColor="black" icon="user" iconColor="black" textColor="black" borderBottomColor="black"/>
                       
 
           <Input label="Contraseña" round
-            onChangeText={(text) => { this.setState({password: text}) }} value={this.state.password}
+            onChangeText={setPassword} 
+            value={password}
             placeholderTextColor="black" icon="lock" iconColor="black" textColor="black" borderBottomColor="black" password={true} />
            
            <View style={{width:'100%', height:'20%'}} />
     </View>
     <View style={{padding:25}} >
-        <Button title="INGRESAR"  onPress={()=>this.Login()} bg={Colors.primary} />
+        <Button title="INGRESAR"  onPress={()=>Login()} bg={Colors.primary} />
     </View>
   </View>
 
@@ -114,7 +85,7 @@ return (
     </SafeAreaView>
     </TouchableWithoutFeedback>
     <TouchableOpacity style={{alignItems:'center' , padding:20, position:'absolute', bottom:0, left:0, right:0}}  
-      onPress={()=>this.props.navigation.navigate('Register')} >
+      onPress={()=>props.navigation.navigate('Register')} >
         <Text>Registrarme</Text>
     </TouchableOpacity>
     </KeyboardAvoidingView>
@@ -122,13 +93,7 @@ return (
 
   );
 }
-};
 
-Login.navigationOptions = {
-  title: ' ',
-  headerTitleStyle:{fontSize:15, color: Colors.headerTint},
-  header:null
-};
 
 const styles = StyleSheet.create({
   container: {

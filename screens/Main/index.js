@@ -17,7 +17,9 @@ isLogin({LOGGED_IN});
 
 
  signOut = () =>{
-  setLOGGED_IN(false)
+  setLOGGED_IN(false);
+  setStorage('isLogin','');
+  setStorage('UID', '');    
  }
 
 return (   

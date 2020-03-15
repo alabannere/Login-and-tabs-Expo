@@ -7,13 +7,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import SignInScreen  from './SignInScreen';
-import HomeScreen  from './HomeScreen';
-
 //SCREENS
 import BottomTabNavigator from './navigation/BottomTabNavigator';
-//import Login from './screens/Auth/Login';
-//import Register from './screens/Auth/Register';
+import LoginScreen  from './screens/Auth/Login';
+import RegisterScreen  from './screens/Auth/Register';
 //SCREENS
 
 
@@ -34,13 +31,20 @@ export default function App(props) {
   const containerRef = React.useRef();
   const { getInitialState } = useLinking(containerRef);
   
-  const [state] = React.useReducer(
-    {
-      isLoading: false
+  const [state] = React.useReducer({
+          isLoading: false
+        });
+
+  _retrieveData = async () => {
+    try {
+      const value = await AsyncStorage.getItem('isLogin');
+      if (value) {
+        setLOGGED_IN(value)
+      }
+    } catch (error) {
+
     }
-  );
-
-
+  };
 
   const authContext = React.useMemo(() => ({
       isLogin: async data => {
@@ -70,6 +74,8 @@ export default function App(props) {
     }
 
     loadResourcesAndDataAsync();
+    _retrieveData();
+
   if (!isLoadingComplete && !props.skipLoadingScreen) {
     return null;
   } else {
@@ -82,7 +88,8 @@ export default function App(props) {
             </Stack.Navigator>
           ) : (
             <Stack.Navigator>
-              <Stack.Screen name="SignIn" options={{headerShown: false}} component={SignInScreen} />
+              <Stack.Screen name="Login" options={{headerShown: false}} component={LoginScreen} />
+              <Stack.Screen name="Register" options={{headerShown: true}} component={RegisterScreen} />
             </Stack.Navigator>
           )}
       </NavigationContainer>
